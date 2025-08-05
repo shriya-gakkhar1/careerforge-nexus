@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co'
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder_key'
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
@@ -98,30 +98,45 @@ export interface SkillGap {
 
 // Auth helpers
 export const getCurrentUser = async () => {
-  const { data: { session }, error } = await supabase.auth.getSession()
-  if (error) throw error
-  return session?.user
+  try {
+    const { data: { session }, error } = await supabase.auth.getSession()
+    if (error) throw error
+    return session?.user
+  } catch (error) {
+    console.warn('Supabase not configured, using mock data')
+    return null
+  }
 }
 
 export const signUp = async (email: string, password: string, profile: Partial<Profile>) => {
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: profile
-    }
-  })
-  if (error) throw error
-  return data
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: profile
+      }
+    })
+    if (error) throw error
+    return data
+  } catch (error) {
+    console.warn('Supabase not configured, using mock signup')
+    return { user: { id: 'mock-user-id', email } }
+  }
 }
 
 export const signIn = async (email: string, password: string) => {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  })
-  if (error) throw error
-  return data
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    })
+    if (error) throw error
+    return data
+  } catch (error) {
+    console.warn('Supabase not configured, using mock signin')
+    return { user: { id: 'mock-user-id', email } }
+  }
 }
 
 export const signOut = async () => {

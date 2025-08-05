@@ -132,7 +132,7 @@ export default function Landing() {
               </Link>
               <Link to="/demo">
                 <Button variant="outline" size="lg" className="text-lg px-8 py-6 border-primary/20 hover:border-primary">
-                  View Demo
+                  Explore Demo
                 </Button>
               </Link>
             </div>

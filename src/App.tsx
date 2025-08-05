@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import Landing from "./pages/Landing";
 import Dashboard from "./pages/Dashboard";
+import Demo from "./pages/Demo";
 import SignUp from "./pages/Auth/SignUp";
 import Login from "./pages/Auth/Login";
 import Onboarding from "./pages/Onboarding";
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/internships" element={<ProtectedRoute><Internships /></ProtectedRoute>} />
             <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
             <Route path="/skills" element={<ProtectedRoute><Skills /></ProtectedRoute>} />
+            <Route path="/demo" element={<Demo />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

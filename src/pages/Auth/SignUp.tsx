@@ -83,23 +83,22 @@ export default function SignUp() {
 
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="name"
-                      name="name"
-                      type="text"
-                      placeholder="John Doe"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      className="pl-9"
-                      required
-                    />
-                  </div>
+              <div className="space-y-2">
+                <Label htmlFor="name">Full Name</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="name"
+                    name="name"
+                    type="text"
+                    placeholder="John Doe"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className="pl-9"
+                    required
+                  />
                 </div>
+              </div>
 
               <div className="space-y-2">
                 <Label htmlFor="year">Year</Label>
@@ -115,7 +114,6 @@ export default function SignUp() {
                     <SelectItem value="Graduate">Graduate</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
               </div>
 
               <div className="space-y-2">

@@ -4,8 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { useAuth } from "@/hooks/useAuth";
-import { getInternships, getProjectRecommendations, getSkillGaps } from "@/lib/supabase";
+import { Link } from "react-router-dom";
 import { 
   Search, 
   TrendingUp, 
@@ -24,38 +23,10 @@ import {
   Clock
 } from "lucide-react";
 
-export default function Dashboard() {
-  const { user, profile, signOut } = useAuth();
-  const [recentOpportunities, setRecentOpportunities] = useState<any[]>([]);
-  const [projectSuggestions, setProjectSuggestions] = useState<any[]>([]);
-  const [skillGaps, setSkillGaps] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function Demo() {
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (user) {
-      loadDashboardData();
-    }
-  }, [user]);
-
-  const loadDashboardData = async () => {
-    try {
-      const [internships, projects, skills] = await Promise.all([
-        getInternships(5),
-        getProjectRecommendations(user!.id),
-        getSkillGaps(user!.id)
-      ]);
-      
-      setRecentOpportunities(internships || []);
-      setProjectSuggestions(projects?.slice(0, 2) || []);
-      setSkillGaps(skills?.slice(0, 2) || []);
-    } catch (error) {
-      console.error('Error loading dashboard data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Mock data fallbacks
+  // Mock data for demo
   const mockOpportunities = [
     {
       id: 1,
@@ -100,36 +71,22 @@ export default function Dashboard() {
     }
   ];
 
-  const displayOpportunities = recentOpportunities.length > 0 ? recentOpportunities : mockOpportunities;
-  const displayProjects = projectSuggestions.length > 0 ? projectSuggestions : mockProjects;
-  const displaySkillGaps = skillGaps.length > 0 ? skillGaps : mockSkillGaps;
-
-  if (!profile) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Loading your dashboard...</h1>
-        </div>
-      </div>
-    );
-  }
-
   const stats = [
     { label: "Applications Sent", value: "12", change: "+3 this week" },
     { label: "Profile Views", value: "48", change: "+12 this week" },
     { label: "Skill Score", value: "85%", change: "+5% this month" },
-    { label: "Projects", value: displayProjects.length.toString(), change: "2 in progress" }
+    { label: "Projects", value: mockProjects.length.toString(), change: "2 in progress" }
   ];
 
   return (
     <div className="min-h-screen bg-background">
       <NavBar 
         user={{
-          name: profile.full_name,
-          email: user?.email || '',
+          name: "Demo User",
+          email: "demo@projectnexus.com",
           avatar: ''
         }} 
-        onLogout={signOut}
+        onLogout={() => {}}
       />
 
       <div className="container mx-auto px-4 py-8">
@@ -138,10 +95,10 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold mb-2">
-                Welcome back, <span className="text-primary">{profile.full_name.split(' ')[0]}</span>! 👋
+                Welcome back, <span className="text-primary">Demo</span>! 👋
               </h1>
               <p className="text-muted-foreground">
-                {profile.year} • {profile.branch} • {profile.college}
+                3rd Year • Computer Science Engineering • IIT Delhi
               </p>
             </div>
             <Button variant="outline" size="sm">
@@ -194,7 +151,7 @@ export default function Dashboard() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                {displayOpportunities.map((opportunity) => (
+                {mockOpportunities.map((opportunity) => (
                   <div
                     key={opportunity.id} 
                     className="p-4 rounded-lg border border-border/40 bg-nexus-surface/30 hover:bg-nexus-surface/50 nexus-transition"
@@ -213,7 +170,7 @@ export default function Dashboard() {
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
-                            Due: {opportunity.deadline}
+                            Due: {opportunity.application_deadline}
                           </span>
                           <span className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
@@ -224,7 +181,7 @@ export default function Dashboard() {
                       <div className="text-right">
                         <div className="flex items-center gap-1 mb-2">
                           <Star className="h-4 w-4 text-yellow-500" />
-                          <span className="font-semibold text-primary">{opportunity.match}% match</span>
+                          <span className="font-semibold text-primary">{opportunity.match_score}% match</span>
                         </div>
                         <Button size="sm" className="nexus-gradient">
                           Apply Now
@@ -232,7 +189,7 @@ export default function Dashboard() {
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-1">
-                      {opportunity.skills.map((skill) => (
+                      {opportunity.skills_required.map((skill) => (
                         <Badge key={skill} variant="secondary" className="text-xs">
                           {skill}
                         </Badge>
@@ -255,7 +212,7 @@ export default function Dashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {projectSuggestions.map((project, index) => (
+                {mockProjects.map((project, index) => (
                   <div key={index} className="p-4 rounded-lg border border-border/40 bg-nexus-surface/30">
                     <div className="flex items-start justify-between mb-3">
                       <div>
@@ -276,7 +233,7 @@ export default function Dashboard() {
                       </Button>
                     </div>
                     <div className="flex flex-wrap gap-1">
-                      {project.skills.map((skill) => (
+                      {project.tech_stack.map((skill) => (
                         <Badge key={skill} variant="secondary" className="text-xs">
                           {skill}
                         </Badge>
@@ -302,7 +259,7 @@ export default function Dashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {skillGaps.map((gap, index) => (
+                {mockSkillGaps.map((gap, index) => (
                   <div key={index} className="space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">{gap.target_role}</span>
@@ -371,4 +328,4 @@ export default function Dashboard() {
       </div>
     </div>
   );
-}
+} 

@@ -52,6 +52,15 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				nexus: {
+					DEFAULT: 'hsl(var(--primary))',
+					accent: 'hsl(var(--nexus-accent))',
+					success: 'hsl(var(--nexus-success))',
+					warning: 'hsl(var(--nexus-warning))',
+					info: 'hsl(var(--nexus-info))',
+					surface: 'hsl(var(--nexus-surface))',
+					elevated: 'hsl(var(--nexus-surface-elevated))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',

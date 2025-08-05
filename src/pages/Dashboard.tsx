@@ -1,6 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavBar } from "@/components/ui/nav-bar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { useAuth } from "@/hooks/useAuth";
+import { getInternships, getProjectRecommendations, getSkillGaps } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -23,97 +28,112 @@ import {
 } from "lucide-react";
 
 export default function Dashboard() {
-  const [user] = useState({
-    name: "Priya Sharma",
-    email: "priya@iitdelhi.ac.in",
-    avatar: "",
-    college: "IIT Delhi",
-    branch: "Computer Science Engineering",
-    year: "3rd Year",
-    skills: ["Python", "React", "Node.js", "Git", "MySQL"],
-    targetRole: "Software Development Engineer"
-  });
+  const { user, profile, signOut } = useAuth();
+  const [recentOpportunities, setRecentOpportunities] = useState<any[]>([]);
+  const [projectSuggestions, setProjectSuggestions] = useState<any[]>([]);
+  const [skillGaps, setSkillGaps] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const recentOpportunities = [
+  useEffect(() => {
+    if (user) {
+      loadDashboardData();
+    }
+  }, [user]);
+
+  const loadDashboardData = async () => {
+    try {
+      const [internships, projects, skills] = await Promise.all([
+        getInternships(5),
+        getProjectRecommendations(user!.id),
+        getSkillGaps(user!.id)
+      ]);
+      
+      setRecentOpportunities(internships || []);
+      setProjectSuggestions(projects?.slice(0, 2) || []);
+      setSkillGaps(skills?.slice(0, 2) || []);
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Mock data fallbacks
+  const mockOpportunities = [
     {
       id: 1,
       title: "Software Engineering Intern",
-      company: "Google",
+      company_name: "Google",
       location: "Bangalore",
       type: "Summer Internship",
-      match: 92,
-      deadline: "15 Feb 2024",
-      skills: ["Python", "Data Structures", "System Design"],
-      isFeatured: true
+      match_score: 92,
+      application_deadline: "2024-02-15",
+      skills_required: ["Python", "Data Structures", "System Design"],
+      is_featured: true
     },
     {
       id: 2,
       title: "Frontend Developer Intern",
-      company: "Microsoft",
+      company_name: "Microsoft",
       location: "Hyderabad",
       type: "6 Month Internship",
-      match: 88,
-      deadline: "20 Feb 2024",
-      skills: ["React", "TypeScript", "Azure"],
-      isFeatured: false
-    },
-    {
-      id: 3,
-      title: "Full Stack Intern",
-      company: "Flipkart",
-      location: "Bangalore",
-      type: "Summer Internship",
-      match: 85,
-      deadline: "25 Feb 2024",
-      skills: ["Node.js", "React", "MongoDB"],
-      isFeatured: false
+      match_score: 88,
+      application_deadline: "2024-02-20",
+      skills_required: ["React", "TypeScript", "Azure"],
+      is_featured: false
     }
   ];
 
-  const skillGaps = [
-    {
-      role: "SDE at Google",
-      missingSkills: ["System Design", "Docker", "Kubernetes"],
-      progress: 65,
-      priority: "High"
-    },
-    {
-      role: "Frontend at Microsoft",
-      missingSkills: ["TypeScript", "Azure"],
-      progress: 80,
-      priority: "Medium"
-    }
-  ];
-
-  const projectSuggestions = [
+  const mockProjects = [
     {
       title: "Real-time Chat Application",
       description: "Build a scalable chat app with WebSocket, React, and Node.js",
       difficulty: "Intermediate",
-      duration: "2-3 weeks",
-      skills: ["React", "Node.js", "Socket.io", "MongoDB"],
-      impact: "High"
-    },
-    {
-      title: "AI Resume Analyzer",
-      description: "Create an AI tool that analyzes resumes and suggests improvements",
-      difficulty: "Advanced",
-      duration: "3-4 weeks",
-      skills: ["Python", "NLP", "Flask", "Machine Learning"],
-      impact: "Very High"
+      estimated_duration: "2-3 weeks",
+      tech_stack: ["React", "Node.js", "Socket.io", "MongoDB"],
+      impact_score: 85
     }
   ];
+
+  const mockSkillGaps = [
+    {
+      target_role: "SDE at Google",
+      missing_skills: ["System Design", "Docker", "Kubernetes"],
+      current_match_percentage: 65
+    }
+  ];
+
+  const displayOpportunities = recentOpportunities.length > 0 ? recentOpportunities : mockOpportunities;
+  const displayProjects = projectSuggestions.length > 0 ? projectSuggestions : mockProjects;
+  const displaySkillGaps = skillGaps.length > 0 ? skillGaps : mockSkillGaps;
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Loading your dashboard...</h1>
+        </div>
+      </div>
+    );
+  }
 
   const stats = [
     { label: "Applications Sent", value: "12", change: "+3 this week" },
     { label: "Profile Views", value: "48", change: "+12 this week" },
     { label: "Skill Score", value: "85%", change: "+5% this month" },
-    { label: "Projects", value: "4", change: "2 in progress" }
+    { label: "Projects", value: displayProjects.length.toString(), change: "2 in progress" }
   ];
 
   return (
     <div className="min-h-screen bg-background">
-      <NavBar user={user} />
+      <NavBar 
+        user={{
+          name: profile.full_name,
+          email: user?.email || '',
+          avatar: ''
+        }} 
+        onLogout={signOut}
+      />
 
       <div className="container mx-auto px-4 py-8">
         {/* Welcome Section */}
@@ -121,10 +141,10 @@ export default function Dashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold mb-2">
-                Welcome back, <span className="text-primary">{user.name.split(' ')[0]}</span>! 👋
+                Welcome back, <span className="text-primary">{profile.full_name.split(' ')[0]}</span>! 👋
               </h1>
               <p className="text-muted-foreground">
-                {user.year} • {user.branch} • {user.college}
+                {profile.year} • {profile.branch} • {profile.college}
               </p>
             </div>
             <Button variant="outline" size="sm">
@@ -177,8 +197,8 @@ export default function Dashboard() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                {recentOpportunities.map((opportunity) => (
-                  <div 
+                {displayOpportunities.map((opportunity) => (
+                  <div
                     key={opportunity.id} 
                     className="p-4 rounded-lg border border-border/40 bg-nexus-surface/30 hover:bg-nexus-surface/50 nexus-transition"
                   >
@@ -186,12 +206,12 @@ export default function Dashboard() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="font-semibold">{opportunity.title}</h3>
-                          {opportunity.isFeatured && (
+                          {opportunity.is_featured && (
                             <Badge className="bg-nexus-accent text-white">Featured</Badge>
                           )}
                         </div>
                         <p className="text-sm text-muted-foreground mb-2">
-                          {opportunity.company} • {opportunity.location}
+                          {opportunity.company_name} • {opportunity.location}
                         </p>
                         <div className="flex items-center gap-4 text-xs text-muted-foreground">
                           <span className="flex items-center gap-1">
@@ -246,11 +266,11 @@ export default function Dashboard() {
                         <p className="text-sm text-muted-foreground mb-2">{project.description}</p>
                         <div className="flex items-center gap-4 text-xs">
                           <Badge variant="outline">{project.difficulty}</Badge>
-                          <span className="text-muted-foreground">{project.duration}</span>
+                          <span className="text-muted-foreground">{project.estimated_duration}</span>
                           <Badge className={
-                            project.impact === "Very High" ? "bg-nexus-success" : "bg-nexus-info"
+                            project.impact_score > 90 ? "bg-nexus-success" : "bg-nexus-info"
                           }>
-                            {project.impact} Impact
+                            {project.impact_score}% Impact
                           </Badge>
                         </div>
                       </div>
@@ -288,14 +308,14 @@ export default function Dashboard() {
                 {skillGaps.map((gap, index) => (
                   <div key={index} className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{gap.role}</span>
-                      <Badge variant={gap.priority === "High" ? "destructive" : "secondary"}>
-                        {gap.priority}
+                      <span className="text-sm font-medium">{gap.target_role}</span>
+                      <Badge variant="secondary">
+                        High Priority
                       </Badge>
                     </div>
-                    <Progress value={gap.progress} className="h-2" />
+                    <Progress value={gap.current_match_percentage} className="h-2" />
                     <div className="text-xs text-muted-foreground">
-                      Missing: {gap.missingSkills.join(", ")}
+                      Missing: {gap.missing_skills.join(", ")}
                     </div>
                   </div>
                 ))}

@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, Mail, Lock } from "lucide-react";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { signIn } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -27,14 +29,11 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      // TODO: Implement Supabase auth login
-      // For now, simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      toast.success("Welcome back!");
+      await signIn(formData.email, formData.password);
+      toast.success("Welcome back to Project Nexus!");
       navigate("/dashboard");
-    } catch (error) {
-      toast.error("Invalid email or password. Please try again.");
+    } catch (error: any) {
+      toast.error(error.message || "Invalid email or password. Please try again.");
     } finally {
       setIsLoading(false);
     }

@@ -4,11 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { ArrowLeft, Loader2, Mail, Lock, User, GraduationCap } from "lucide-react";
 
 export default function SignUp() {
   const navigate = useNavigate();
+  const { signUp } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -31,14 +34,17 @@ export default function SignUp() {
     setIsLoading(true);
 
     try {
-      // TODO: Implement Supabase auth signup
-      // For now, simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await signUp(formData.email, formData.password, {
+        full_name: formData.name,
+        college: formData.college,
+        branch: formData.branch as any,
+        year: formData.year as any
+      });
       
-      toast.success("Account created successfully! Please check your email to verify your account.");
+      toast.success("Account created successfully! Welcome to Project Nexus!");
       navigate("/onboarding");
-    } catch (error) {
-      toast.error("Failed to create account. Please try again.");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to create account. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -95,22 +101,21 @@ export default function SignUp() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="year">Year</Label>
-                  <div className="relative">
-                    <GraduationCap className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="year"
-                      name="year"
-                      type="text"
-                      placeholder="3rd Year"
-                      value={formData.year}
-                      onChange={handleInputChange}
-                      className="pl-9"
-                      required
-                    />
-                  </div>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="year">Year</Label>
+                <Select value={formData.year} onValueChange={(value) => setFormData(prev => ({ ...prev, year: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1st Year">1st Year</SelectItem>
+                    <SelectItem value="2nd Year">2nd Year</SelectItem>
+                    <SelectItem value="3rd Year">3rd Year</SelectItem>
+                    <SelectItem value="4th Year">4th Year</SelectItem>
+                    <SelectItem value="Graduate">Graduate</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               </div>
 
               <div className="space-y-2">
@@ -162,15 +167,21 @@ export default function SignUp() {
 
               <div className="space-y-2">
                 <Label htmlFor="branch">Branch</Label>
-                <Input
-                  id="branch"
-                  name="branch"
-                  type="text"
-                  placeholder="Computer Science Engineering"
-                  value={formData.branch}
-                  onChange={handleInputChange}
-                  required
-                />
+                <Select value={formData.branch} onValueChange={(value) => setFormData(prev => ({ ...prev, branch: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select your branch" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Computer Science Engineering">Computer Science Engineering</SelectItem>
+                    <SelectItem value="Information Technology">Information Technology</SelectItem>
+                    <SelectItem value="Electronics and Communication">Electronics and Communication</SelectItem>
+                    <SelectItem value="Electrical Engineering">Electrical Engineering</SelectItem>
+                    <SelectItem value="Mechanical Engineering">Mechanical Engineering</SelectItem>
+                    <SelectItem value="Civil Engineering">Civil Engineering</SelectItem>
+                    <SelectItem value="Chemical Engineering">Chemical Engineering</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <Button 
